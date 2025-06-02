@@ -330,15 +330,15 @@ if (!$order) {
                       <td><?php echo htmlspecialchars($item['name']); ?></td>
                       <td><?php echo htmlspecialchars($item['category']); ?></td>
                       <td><?php echo $item['quantity']; ?></td>
-                      <td>$<?php echo number_format($item['price'], 2); ?></td>
-                      <td>$<?php echo number_format($item['subtotal'], 2); ?></td>
+                      <td>pkr <?php echo number_format($item['price'], 2); ?></td>
+                      <td>pkr <?php echo number_format($item['subtotal'], 2); ?></td>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
               </table>
             </div>
             <div class="order-total">
-              Total: $<?php echo number_format($order['total'], 2); ?>
+              Total: pkr <?php echo number_format($order['total'], 2); ?>
             </div>
             <a href="menu.php?vendor_id=<?php echo $order['vendor_id']; ?>" class="btn-back">
               <i class="fas fa-arrow-left me-2"></i>Back to Menu

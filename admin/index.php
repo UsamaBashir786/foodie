@@ -91,6 +91,7 @@ $avg_delivery_time = 30; // No delivery time data in schema
         </div>
       </div>
     </div>
+    <?php include 'includes/approve_vendor.php' ?>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -157,4 +158,3 @@ $avg_delivery_time = 30; // No delivery time data in schema
 </body>
 
 </html>
-<?php $conn->close(); ?>

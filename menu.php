@@ -187,9 +187,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 
   // Insert order
   $orderQuery = "INSERT INTO orders (user_id, vendor_id, subtotal, discount_amount, total, delivery_address, payment_method, order_date, status, delivery_fee)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)";
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)";
   $stmt = mysqli_prepare($conn, $orderQuery);
-  mysqli_stmt_bind_param($stmt, 'iiddssd', $user_id, $vendor_id, $subtotal, $discount_amount, $total, $delivery_address, $payment_method, $order_date, $delivery_fee);
+  mysqli_stmt_bind_param($stmt, 'iiddssdss', $user_id, $vendor_id, $subtotal, $discount_amount, $total, $delivery_address, $payment_method, $order_date, $delivery_fee);
   if (mysqli_stmt_execute($stmt)) {
     $order_id = mysqli_insert_id($conn);
 
@@ -1305,4 +1305,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
   </script>
 </body>
 
-</html> 
+</html>

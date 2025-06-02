@@ -26,16 +26,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $error_message = "Email and password are required.";
   } else {
     try {
-      $stmt = $conn->prepare("SELECT id, email, password FROM vendors WHERE email = :email");
+      $stmt = $conn->prepare("SELECT id, email, password, status FROM vendors WHERE email = :email");
       $stmt->bindParam(':email', $email);
       $stmt->execute();
       $vendor = $stmt->fetch(PDO::FETCH_ASSOC);
 
       if ($vendor && password_verify($password, $vendor['password'])) {
-        $_SESSION['vendor_id'] = $vendor['id'];
-        $_SESSION['vendor_email'] = $vendor['email'];
-        header("Location: index.php");
-        exit();
+        if ($vendor['status'] === 'active') {
+          $_SESSION['vendor_id'] = $vendor['id'];
+          $_SESSION['vendor_email'] = $vendor['email'];
+          header("Location: index.php");
+          exit();
+        } else {
+          $error_message = "Your account is pending approval. Please wait for admin activation.";
+        }
       } else {
         $error_message = "Invalid email or password.";
       }
