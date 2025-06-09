@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 02, 2025 at 06:22 PM
+-- Generation Time: Jun 09, 2025 at 08:15 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -55,16 +55,15 @@ INSERT INTO `admin` (`id`, `username`, `password`, `security_question`, `securit
 DROP TABLE IF EXISTS `contact_messages`;
 CREATE TABLE IF NOT EXISTS `contact_messages` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `first_name` varchar(100) NOT NULL,
-  `last_name` varchar(100) NOT NULL,
-  `email` varchar(255) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `subject` varchar(100) NOT NULL,
+  `subject` enum('general','order','delivery','feedback','partnership','other') NOT NULL,
   `message` text NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -77,21 +76,22 @@ CREATE TABLE IF NOT EXISTS `menu_items` (
   `id` int NOT NULL AUTO_INCREMENT,
   `vendor_id` int NOT NULL,
   `name` varchar(255) NOT NULL,
-  `category` enum('Pizzas','Sides','Drinks','Desserts') NOT NULL,
+  `category` enum('Pizzas','Burgers','Sides','Drinks','Desserts','Salads','Appetizers','Soups','Sandwiches','Breakfast','Seafood','Vegetarian','Vegan','Kids Menu','Specials','Alcoholic Beverages','Coffee & Tea','Smoothies') NOT NULL,
   `description` text,
   `price` decimal(10,2) NOT NULL,
   `image` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `menu_items`
 --
 
 INSERT INTO `menu_items` (`id`, `vendor_id`, `name`, `category`, `description`, `price`, `image`, `created_at`) VALUES
-(8, 2, 'Pizza', 'Pizzas', 'gfdsg', 22.00, 'Uploads/menu_683cc6241f7505.01560698.png', '2025-06-01 21:29:08');
+(16, 6, 'test', 'Breakfast', 'sdfs', 123.00, 'Uploads/menu_6847376ee1d914.40663351.jpeg', '2025-06-09 19:35:10'),
+(17, 6, 'test', 'Breakfast', 'qdsadg', 222.00, 'Uploads/menu_6847377ca0e027.42839645.jpg', '2025-06-09 19:35:24');
 
 -- --------------------------------------------------------
 
@@ -118,14 +118,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `order_type`, `user_id`, `vendor_id`, `total`, `delivery_address`, `payment_method`, `order_date`, `status`, `created_at`, `updated_at`, `delivery_fee`, `discount_amount`, `subtotal`) VALUES
-(7, 'Order', 2, 2, 272.00, 'Wahga Border', '0', '2025-06-02 18:19:49', 'Pending', '2025-06-02 18:19:49', '2025-06-02 18:19:49', 250.00, 0.00, 22.00);
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -146,39 +139,43 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   KEY `menu_item_id` (`menu_item_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `menu_item_id`, `quantity`, `price`, `subtotal`, `created_at`, `booking_details`) VALUES
-(7, 7, 8, 1, 22.00, 22.00, '2025-06-02 18:19:49', NULL);
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `reservations`
+-- Table structure for table `payments`
 --
 
-DROP TABLE IF EXISTS `reservations`;
-CREATE TABLE IF NOT EXISTS `reservations` (
+DROP TABLE IF EXISTS `payments`;
+CREATE TABLE IF NOT EXISTS `payments` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
-  `vendor_id` int NOT NULL,
-  `subscription_id` int DEFAULT NULL,
-  `slot_id` int NOT NULL,
-  `reservation_date` datetime NOT NULL,
-  `party_size` int NOT NULL,
-  `status` enum('confirmed','cancelled') DEFAULT 'confirmed',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `subscription_id` int NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('paid','pending') DEFAULT 'pending',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  KEY `vendor_id` (`vendor_id`),
-  KEY `slot_id` (`slot_id`),
   KEY `subscription_id` (`subscription_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reservation_items`
+--
+
+DROP TABLE IF EXISTS `reservation_items`;
+CREATE TABLE IF NOT EXISTS `reservation_items` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `reservation_id` int NOT NULL,
+  `menu_item_id` int NOT NULL,
+  `quantity` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_reservation_id` (`reservation_id`),
+  KEY `fk_menu_item_id` (`menu_item_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -193,12 +190,12 @@ CREATE TABLE IF NOT EXISTS `reservation_slots` (
   `slot_date` date NOT NULL,
   `slot_time` time NOT NULL,
   `capacity` int NOT NULL,
-  `status` enum('available','fully_booked') DEFAULT 'available',
+  `status` enum('available','fully_booked') NOT NULL DEFAULT 'available',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -210,6 +207,14 @@ DROP TABLE IF EXISTS `subscriptions`;
 CREATE TABLE IF NOT EXISTS `subscriptions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `vendor_id` int NOT NULL,
+  `per_head` tinyint(1) NOT NULL DEFAULT '0',
+  `min_headcount` int DEFAULT NULL,
+  `max_headcount` int DEFAULT NULL,
+  `custom_plan` tinyint(1) NOT NULL DEFAULT '0',
+  `custom_plan_name` varchar(255) DEFAULT NULL,
+  `dietary_preferences` varchar(255) DEFAULT NULL,
+  `delivery_frequency` enum('Daily','Weekly','Biweekly') NOT NULL,
+  `description` text,
   `plan_type` enum('Basic','Standard','Premium') NOT NULL,
   `dish_limit` int NOT NULL,
   `meal_times` varchar(255) NOT NULL,
@@ -223,16 +228,32 @@ CREATE TABLE IF NOT EXISTS `subscriptions` (
   `non_subscriber_delivery_fee` decimal(10,2) NOT NULL DEFAULT '250.00',
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
 
 --
--- Dumping data for table `subscriptions`
+-- Table structure for table `subscription_reservations`
 --
 
-INSERT INTO `subscriptions` (`id`, `vendor_id`, `plan_type`, `dish_limit`, `meal_times`, `price`, `validity_period`, `validity_unit`, `status`, `created_at`, `updated_at`, `discount_percentage`, `non_subscriber_delivery_fee`) VALUES
-(3, 2, 'Basic', 3, 'Morning', 1500.00, 2, 'Days', 'active', '2025-06-01 23:17:20', NULL, 10.00, 250.00),
-(4, 2, 'Standard', 6, 'Morning,Afternoon', 2500.00, 3, 'Days', 'active', '2025-06-01 23:17:44', NULL, 15.00, 250.00),
-(5, 2, 'Premium', 10, 'Morning,Afternoon,Evening', 5000.00, 10, 'Days', 'active', '2025-06-01 23:18:07', NULL, 20.00, 250.00);
+DROP TABLE IF EXISTS `subscription_reservations`;
+CREATE TABLE IF NOT EXISTS `subscription_reservations` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `subscription_id` int NOT NULL,
+  `vendor_id` int NOT NULL,
+  `meal_time` varchar(50) NOT NULL,
+  `reservation_date` date NOT NULL,
+  `headcount` int NOT NULL DEFAULT '1',
+  `status` enum('Pending','Confirmed','Cancelled') NOT NULL DEFAULT 'Pending',
+  `created_at` datetime NOT NULL,
+  `slot_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_user_id` (`user_id`),
+  KEY `fk_subscription_id` (`subscription_id`),
+  KEY `fk_vendor_id` (`vendor_id`),
+  KEY `fk_slot_id` (`slot_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -253,16 +274,19 @@ CREATE TABLE IF NOT EXISTS `users` (
   `city` varchar(100) DEFAULT NULL,
   `postal_code` varchar(20) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `location` varchar(255) DEFAULT NULL,
+  `profile_image` varchar(255) DEFAULT NULL,
+  `cnic` char(13) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `phone`, `password`, `remember_token`, `address`, `city`, `postal_code`, `created_at`) VALUES
-(2, 'test', 'test', 'test@test.com', '03196977218', '$2y$10$f5XfeOZoC2OMcy9DTCqTzuYn6dLKx4VktnzVTnhapb.kAHp05MRbK', NULL, 'Pakistan Punjab, Sahiwal', 'Sahiwal', '57000', '2025-05-31 15:33:19');
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `phone`, `password`, `remember_token`, `address`, `city`, `postal_code`, `created_at`, `location`, `profile_image`, `cnic`) VALUES
+(11, 'test', 'test', 'test@test.com', '03196977218', '$2y$10$Bhz.gco.RaBaxV3peHfpvufNS1kM2YaUH6R.qp/otg9.JqpgHjHhO', NULL, 'Pakistan Punjab, Sahiwal', 'Sahiwal', '57000', '2025-06-09 19:33:39', 'sahiwal', 'uploads/68473713377a1_desktop.jpeg', '3650260114877');
 
 -- --------------------------------------------------------
 
@@ -283,7 +307,7 @@ CREATE TABLE IF NOT EXISTS `user_subscriptions` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `subscription_id` (`subscription_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -304,15 +328,14 @@ CREATE TABLE IF NOT EXISTS `vendors` (
   `license` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `vendors`
 --
 
 INSERT INTO `vendors` (`id`, `restaurant_name`, `email`, `password`, `category`, `contact_number`, `created_at`, `status`, `license`) VALUES
-(2, 'vendor', 'vendor@vendor.com', '$2y$10$dfTPZrDclhrhTzULUsLc3..aZ4GhPOhisHWfE4oAFCaaTJ3grgyZq', 'Pizza', '03196977218', '2025-05-31 15:47:02', 'rejected', ''),
-(3, 'vendor', 'test@test.com', '$2y$10$GBIklD/fbg1zetBHmBtvm.k7FUBiQ6nvglFWnXz8Z54yYwM8lqbfW', 'Italian', '03196977218', '2025-06-02 17:49:19', 'active', '12345678');
+(6, 'vendor', 'vendor@vendor.com', '$2y$10$O3IOmH7mp47g6oqlAfB.1.TSS7XzLaN1tT5ADdNbiyAHIHdWu/WkC', 'Italian', '03196977218', '2025-06-09 19:34:19', 'active', '12345678');
 
 -- --------------------------------------------------------
 
@@ -328,18 +351,14 @@ CREATE TABLE IF NOT EXISTS `vendor_images` (
   `uploaded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `vendor_images`
 --
 
 INSERT INTO `vendor_images` (`id`, `vendor_id`, `image_path`, `uploaded_at`) VALUES
-(1, 2, 'Uploads/vendor_2_683b24761c47d.jpeg', '2025-05-31 15:47:02'),
-(2, 2, 'Uploads/vendor_2_683b24761ce71.jpg', '2025-05-31 15:47:02'),
-(3, 2, 'Uploads/vendor_2_683b24761d525.jpg', '2025-05-31 15:47:02'),
-(4, 2, 'Uploads/vendor_2_683b24761ddc9.jpg', '2025-05-31 15:47:02'),
-(5, 3, 'Uploads/vendor_3_683de41fcfe4b.jpg', '2025-06-02 17:49:19');
+(8, 6, 'Uploads/vendor_6_6847373bca71a.jpeg', '2025-06-09 19:34:19');
 
 -- --------------------------------------------------------
 
@@ -358,21 +377,24 @@ CREATE TABLE IF NOT EXISTS `vendor_schedules` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_schedule` (`vendor_id`,`schedule_date`,`start_time`,`end_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `vendor_schedules`
 --
 
 INSERT INTO `vendor_schedules` (`id`, `vendor_id`, `schedule_date`, `start_time`, `end_time`, `created_at`, `updated_at`) VALUES
-(3, 1, '2025-05-31', '10:00:00', '22:00:00', '2025-05-31 15:28:26', '2025-05-31 15:28:26'),
-(4, 2, '2025-05-31', '10:00:00', '22:00:00', '2025-05-31 15:48:57', '2025-05-31 15:48:57'),
-(5, 2, '2025-06-01', '10:00:00', '22:00:00', '2025-06-01 14:05:39', '2025-06-01 14:05:39'),
-(6, 2, '2025-06-02', '14:00:00', '22:00:00', '2025-06-01 21:26:38', '2025-06-01 21:26:38');
+(9, 6, '2025-06-10', '10:00:00', '22:00:00', '2025-06-09 19:35:31', '2025-06-09 19:35:31');
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `reservation_slots`
+--
+ALTER TABLE `reservation_slots`
+  ADD CONSTRAINT `reservation_slots_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `subscriptions`
