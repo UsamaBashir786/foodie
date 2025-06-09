@@ -1,6 +1,102 @@
 <?php
 session_start();
 require_once 'config/db.php'; // Database connection
+
+// Handle contact form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['first_name'])) {
+  header('Content-Type: application/json'); // Set JSON response header
+
+  $errors = [];
+  $response = ['success' => false, 'message' => '', 'errors' => []];
+
+  // Sanitize and validate inputs
+  $first_name = trim($_POST['first_name'] ?? '');
+  $last_name = trim($_POST['last_name'] ?? '');
+  $email = trim($_POST['email'] ?? '');
+  $phone = trim($_POST['phone'] ?? '');
+  $subject = trim($_POST['subject'] ?? '');
+  $message = trim($_POST['message'] ?? '');
+
+  // Validation rules
+  if (empty($first_name)) {
+    $errors['first_name'] = 'First name is required.';
+  } elseif (strlen($first_name) > 50) {
+    $errors['first_name'] = 'First name must not exceed 50 characters.';
+  }
+
+  if (empty($last_name)) {
+    $errors['last_name'] = 'Last name is required.';
+  } elseif (strlen($last_name) > 50) {
+    $errors['last_name'] = 'Last name must not exceed 50 characters.';
+  }
+
+  if (empty($email)) {
+    $errors['email'] = 'Email address is required.';
+  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors['email'] = 'Invalid email format.';
+  } elseif (strlen($email) > 100) {
+    $errors['email'] = 'Email must not exceed 100 characters.';
+  }
+
+  if (!empty($phone) && !preg_match('/^[\d+\-\(\)\s]{0,20}$/', $phone)) {
+    $errors['phone'] = 'Invalid phone number format.';
+  }
+
+  $valid_subjects = ['general', 'order', 'delivery', 'feedback', 'partnership', 'other'];
+  if (empty($subject)) {
+    $errors['subject'] = 'Subject is required.';
+  } elseif (!in_array($subject, $valid_subjects)) {
+    $errors['subject'] = 'Invalid subject selected.';
+  }
+
+  if (empty($message)) {
+    $errors['message'] = 'Message is required.';
+  } elseif (strlen($message) > 1000) {
+    $errors['message'] = 'Message must not exceed 1000 characters.';
+  }
+
+  // If no errors, proceed to database insertion
+  if (empty($errors)) {
+    try {
+      $query = "INSERT INTO contact_messages (first_name, last_name, email, phone, subject, message, created_at)
+                      VALUES (?, ?, ?, ?, ?, ?, NOW())";
+      $stmt = mysqli_prepare($conn, $query);
+      if (!$stmt) {
+        throw new Exception("Prepare failed: " . mysqli_error($conn));
+      }
+
+      // Bind parameters (phone is nullable, so use NULL if empty)
+      $phone_param = !empty($phone) ? $phone : NULL;
+      mysqli_stmt_bind_param($stmt, 'ssssss', $first_name, $last_name, $email, $phone_param, $subject, $message);
+
+      if (!mysqli_stmt_execute($stmt)) {
+        throw new Exception("Execute failed: " . mysqli_stmt_error($stmt));
+      }
+
+      $response = [
+        'success' => true,
+        'message' => 'Your message has been sent successfully. We will respond within 24 hours.'
+      ];
+
+      mysqli_stmt_close($stmt);
+    } catch (Exception $e) {
+      error_log("Contact form error: " . $e->getMessage(), 3, "logs/error_log");
+      $response = [
+        'success' => false,
+        'message' => 'An error occurred while sending your message. Please try again later.'
+      ];
+    }
+  } else {
+    $response = [
+      'success' => false,
+      'message' => 'Please correct the errors in the form.',
+      'errors' => $errors
+    ];
+  }
+
+  echo json_encode($response);
+  exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

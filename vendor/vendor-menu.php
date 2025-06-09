@@ -63,7 +63,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_menu_item'])) {
     $error_message = "Item name, category, and price are required.";
   } elseif ($price <= 0) {
     $error_message = "Price must be greater than zero.";
-  } elseif (!in_array($category, ['Pizzas', 'Sides', 'Drinks', 'Desserts'])) {
+  } elseif (!in_array($category, [
+    'Pizzas', 'Burgers', 'Sides', 'Drinks', 'Desserts', 'Salads', 'Appetizers', 'Soups',
+    'Sandwiches', 'Breakfast', 'Seafood', 'Vegetarian', 'Vegan', 'Kids Menu', 'Specials',
+    'Alcoholic Beverages', 'Coffee & Tea', 'Smoothies'
+])) {
     $error_message = "Invalid category selected.";
   } else {
     // Handle image upload

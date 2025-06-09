@@ -90,6 +90,7 @@ $avg_delivery_time = 30; // No delivery time data in schema
           <div class="stat-change positive"><i class="fas fa-arrow-down"></i> -<?php echo rand(1, 5); ?> min improvement</div>
         </div>
       </div>
+      <?php include 'includes/contact-section.php' ?>
     </div>
     <?php include 'includes/approve_vendor.php' ?>
   </div>

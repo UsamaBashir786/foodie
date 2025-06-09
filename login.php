@@ -554,19 +554,6 @@ try {
               </button>
             </form>
 
-            <div class="divider">
-              <span>or sign in with</span>
-            </div>
-
-            <div class="social-login">
-              <button class="btn btn-social btn-google" onclick="socialLogin('google')">
-                <i class="fab fa-google me-2"></i>Google
-              </button>
-              <button class="btn btn-social btn-facebook" onclick="socialLogin('facebook')">
-                <i class="fab fa-facebook-f me-2"></i>Facebook
-              </button>
-            </div>
-
             <div class="signup-link">
               Don't have an account? <a href="register.php">Create account</a>
             </div>

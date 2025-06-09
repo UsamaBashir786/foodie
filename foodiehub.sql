@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 01, 2025 at 10:31 PM
+-- Generation Time: Jun 02, 2025 at 06:22 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -118,7 +118,14 @@ CREATE TABLE IF NOT EXISTS `orders` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `order_type`, `user_id`, `vendor_id`, `total`, `delivery_address`, `payment_method`, `order_date`, `status`, `created_at`, `updated_at`, `delivery_fee`, `discount_amount`, `subtotal`) VALUES
+(7, 'Order', 2, 2, 272.00, 'Wahga Border', '0', '2025-06-02 18:19:49', 'Pending', '2025-06-02 18:19:49', '2025-06-02 18:19:49', 250.00, 0.00, 22.00);
 
 -- --------------------------------------------------------
 
@@ -139,7 +146,14 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   KEY `menu_item_id` (`menu_item_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `menu_item_id`, `quantity`, `price`, `subtotal`, `created_at`, `booking_details`) VALUES
+(7, 7, 8, 1, 22.00, 22.00, '2025-06-02 18:19:49', NULL);
 
 -- --------------------------------------------------------
 
@@ -286,16 +300,19 @@ CREATE TABLE IF NOT EXISTS `vendors` (
   `category` varchar(100) NOT NULL,
   `contact_number` varchar(15) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` enum('pending','active','rejected') NOT NULL DEFAULT 'pending',
+  `license` varchar(100) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `vendors`
 --
 
-INSERT INTO `vendors` (`id`, `restaurant_name`, `email`, `password`, `category`, `contact_number`, `created_at`) VALUES
-(2, 'vendor', 'vendor@vendor.com', '$2y$10$dfTPZrDclhrhTzULUsLc3..aZ4GhPOhisHWfE4oAFCaaTJ3grgyZq', 'Pizza', '03196977218', '2025-05-31 15:47:02');
+INSERT INTO `vendors` (`id`, `restaurant_name`, `email`, `password`, `category`, `contact_number`, `created_at`, `status`, `license`) VALUES
+(2, 'vendor', 'vendor@vendor.com', '$2y$10$dfTPZrDclhrhTzULUsLc3..aZ4GhPOhisHWfE4oAFCaaTJ3grgyZq', 'Pizza', '03196977218', '2025-05-31 15:47:02', 'rejected', ''),
+(3, 'vendor', 'test@test.com', '$2y$10$GBIklD/fbg1zetBHmBtvm.k7FUBiQ6nvglFWnXz8Z54yYwM8lqbfW', 'Italian', '03196977218', '2025-06-02 17:49:19', 'active', '12345678');
 
 -- --------------------------------------------------------
 
@@ -311,7 +328,7 @@ CREATE TABLE IF NOT EXISTS `vendor_images` (
   `uploaded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `vendor_images`
@@ -321,7 +338,8 @@ INSERT INTO `vendor_images` (`id`, `vendor_id`, `image_path`, `uploaded_at`) VAL
 (1, 2, 'Uploads/vendor_2_683b24761c47d.jpeg', '2025-05-31 15:47:02'),
 (2, 2, 'Uploads/vendor_2_683b24761ce71.jpg', '2025-05-31 15:47:02'),
 (3, 2, 'Uploads/vendor_2_683b24761d525.jpg', '2025-05-31 15:47:02'),
-(4, 2, 'Uploads/vendor_2_683b24761ddc9.jpg', '2025-05-31 15:47:02');
+(4, 2, 'Uploads/vendor_2_683b24761ddc9.jpg', '2025-05-31 15:47:02'),
+(5, 3, 'Uploads/vendor_3_683de41fcfe4b.jpg', '2025-06-02 17:49:19');
 
 -- --------------------------------------------------------
 

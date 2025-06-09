@@ -69,17 +69,17 @@
     <li class="nav-item">
       <a class="nav-link" href="index.php"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
     </li>
-    <li class="nav-item">
+    <!-- <li class="nav-item">
       <a class="nav-link" href="vendor-orders.php"><i class="fas fa-clipboard-list me-2"></i>Orders</a>
+    </li> -->
+    <li class="nav-item">
+      <a class="nav-link" href="vendor-menu.php"><i class="fas fa-utensils me-2"></i>Menu</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link active" href="vendor-menu.php"><i class="fas fa-utensils me-2"></i>Menu</a>
+      <a class="nav-link " href="add-plan.php"><i class="fas fa-utensils me-2"></i>Plans</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link active" href="add-plan.php"><i class="fas fa-utensils me-2"></i>Plans</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link active" href="vendor-menu.php"><i class="fas fa-utensils me-2"></i>Menu</a>
+      <a class="nav-link" href="vendor-menu.php"><i class="fas fa-utensils me-2"></i>Menu</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="vendor-details.php"><i class="fas fa-cog me-2"></i>Settings</a>

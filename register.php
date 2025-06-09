@@ -27,10 +27,34 @@ try {
     $address = trim($_POST['address'] ?? '');
     $city = trim($_POST['city'] ?? '');
     $postal_code = trim($_POST['postal_code'] ?? '');
+    $location = trim($_POST['location'] ?? '');
+    $cnic = trim($_POST['cnic'] ?? '');
     $terms_accepted = isset($_POST['terms_accepted']);
 
+    // Profile image handling
+    $profile_image = null;
+    if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+      $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
+      $max_size = 2 * 1024 * 1024; // 2MB
+      $upload_dir = 'uploads/';
+      $file_name = uniqid() . '_' . basename($_FILES['profile_image']['name']);
+      $file_path = $upload_dir . $file_name;
+
+      if (!in_array($_FILES['profile_image']['type'], $allowed_types)) {
+        $error = "Only JPEG, PNG, or GIF images are allowed.";
+      } elseif ($_FILES['profile_image']['size'] > $max_size) {
+        $error = "Profile image must be less than 2MB.";
+      } elseif (!is_dir($upload_dir) && !mkdir($upload_dir, 0777, true)) {
+        $error = "Failed to create upload directory.";
+      } elseif (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $file_path)) {
+        $error = "Failed to upload profile image.";
+      } else {
+        $profile_image = $file_path;
+      }
+    }
+
     // Server-side validation
-    if (empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($password)) {
+    if (empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($password) || empty($cnic)) {
       $error = "All required fields must be filled.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
       $error = "Invalid email format.";
@@ -40,6 +64,8 @@ try {
       $error = "Password must be at least 8 characters long.";
     } elseif (!$terms_accepted) {
       $error = "You must accept the terms and conditions.";
+    } elseif (!preg_match('/^\d{13}$/', $cnic)) {
+      $error = "CNIC must be a 13-digit number.";
     } else {
       // Check if email already exists
       $stmt = $conn->prepare("SELECT id FROM users WHERE email = :email");
@@ -54,8 +80,8 @@ try {
 
         // Prepare and execute insert query
         $stmt = $conn->prepare("
-                    INSERT INTO users (first_name, last_name, email, phone, password, address, city, postal_code, created_at)
-                    VALUES (:first_name, :last_name, :email, :phone, :password, :address, :city, :postal_code, NOW())
+                    INSERT INTO users (first_name, last_name, email, phone, password, address, city, postal_code, location, profile_image, cnic, created_at)
+                    VALUES (:first_name, :last_name, :email, :phone, :password, :address, :city, :postal_code, :location, :profile_image, :cnic, NOW())
                 ");
         $stmt->bindParam(':first_name', $first_name);
         $stmt->bindParam(':last_name', $last_name);
@@ -65,6 +91,9 @@ try {
         $stmt->bindParam(':address', $address);
         $stmt->bindParam(':city', $city);
         $stmt->bindParam(':postal_code', $postal_code);
+        $stmt->bindParam(':location', $location);
+        $stmt->bindParam(':profile_image', $profile_image);
+        $stmt->bindParam(':cnic', $cnic);
 
         if ($stmt->execute()) {
           // Set session variables
@@ -75,7 +104,7 @@ try {
           $success = "Registration successful! Redirecting to dashboard...";
           header("refresh:2;url=index.php"); // Redirect after 2 seconds
         } else {
-          $error = "Registration failed. Please try again.";
+          $error  = "Registration failed. Please try again.";
         }
       }
     }
@@ -425,6 +454,14 @@ try {
       margin-bottom: 1.5rem;
     }
 
+    .profile-image-preview {
+      margin-top: 0.5rem;
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
     @media (max-width: 768px) {
       body {
         padding: 1rem 0;
@@ -498,7 +535,7 @@ try {
               <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
             <?php endif; ?>
 
-            <form id="registrationForm" method="POST" novalidate>
+            <form id="registrationForm" method="POST" enctype="multipart/form-data" novalidate>
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -548,6 +585,29 @@ try {
                 <div class="invalid-feedback"></div>
               </div>
 
+              <div class="form-group">
+                <label class="form-label">CNIC <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="fas fa-id-card"></i>
+                  </span>
+                  <input type="text" class="form-control" id="cnic" name="cnic" placeholder="Enter 13-digit CNIC" value="<?php echo isset($_POST['cnic']) ? htmlspecialchars($_POST['cnic']) : ''; ?>" required>
+                </div>
+                <div class="invalid-feedback"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Profile Image</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="fas fa-image"></i>
+                  </span>
+                  <input type="file" class="form-control" id="profileImage" name="profile_image" accept="image/jpeg,image/png,image/gif">
+                </div>
+                <img id="imagePreview" class="profile-image-preview" style="display: none;" alt="Profile Preview">
+                <div class="invalid-feedback"></div>
+              </div>
+
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-group">
@@ -593,18 +653,29 @@ try {
               </div>
 
               <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-6">
                   <div class="form-group">
                     <label class="form-label">City</label>
                     <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" value="<?php echo isset($_POST['city']) ? htmlspecialchars($_POST['city']) : ''; ?>">
                   </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                   <div class="form-group">
                     <label class="form-label">Postal Code</label>
                     <input type="text" class="form-control" id="postalCode" name="postal_code" placeholder="Enter postal code" value="<?php echo isset($_POST['postal_code']) ? htmlspecialchars($_POST['postal_code']) : ''; ?>">
                   </div>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Location</label>
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="fas fa-map-pin"></i>
+                  </span>
+                  <input type="text" class="form-control" id="location" name="location" placeholder="Enter your location" value="<?php echo isset($_POST['location']) ? htmlspecialchars($_POST['location']) : ''; ?>">
+                </div>
+                <div class="invalid-feedback"></div>
               </div>
 
               <div class="terms-checkbox">
@@ -621,19 +692,6 @@ try {
                 <i class="fas fa-user-plus me-2"></i>Create Account
               </button>
             </form>
-
-            <div class="divider">
-              <span>or sign up with</span>
-            </div>
-
-            <div class="social-login">
-              <button class="btn btn-social btn-google">
-                <i class="fab fa-google me-2"></i>Google
-              </button>
-              <button class="btn btn-social btn-facebook">
-                <i class="fab fa-facebook-f me-2"></i>Facebook
-              </button>
-            </div>
 
             <div class="login-link">
               Already have an account? <a href="login.php">Sign in here</a>
@@ -739,12 +797,66 @@ try {
       this.value = this.value.replace(/[^\d+\-\(\)\s]/g, '');
     });
 
+    // CNIC validation
+    document.getElementById('cnic').addEventListener('input', function() {
+      this.value = this.value.replace(/[^\d]/g, '');
+      if (this.value.length > 13) {
+        this.value = this.value.slice(0, 13);
+      }
+      const feedback = this.nextElementSibling;
+      if (this.value && !/^\d{13}$/.test(this.value)) {
+        this.classList.add('is-invalid');
+        this.classList.remove('is-valid');
+        feedback.textContent = 'CNIC must be a 13-digit number';
+      } else if (this.value) {
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+        feedback.textContent = '';
+      }
+    });
+
+    // Profile image preview
+    document.getElementById('profileImage').addEventListener('change', function() {
+      const file = this.files[0];
+      const preview = document.getElementById('imagePreview');
+      const feedback = this.nextElementSibling;
+
+      if (file) {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+          this.classList.add('is-invalid');
+          feedback.textContent = 'Only JPEG, PNG, or GIF images are allowed';
+          preview.style.display = 'none';
+          return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+          this.classList.add('is-invalid');
+          feedback.textContent = 'Image must be less than 2MB';
+          preview.style.display = 'none';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          feedback.textContent = '';
+          this.classList.remove('is-invalid');
+          this.classList.add('is-valid');
+        }.bind(this);
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = 'none';
+        feedback.textContent = '';
+        this.classList.remove('is-invalid');
+        this.classList.remove('is-valid');
+      }
+    });
+
     // Form submission
     document.getElementById('registrationForm').addEventListener('submit', function(e) {
-      // Allow PHP to handle form submission
       let isValid = true;
 
-      const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'password', 'confirmPassword'];
+      const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'cnic', 'password', 'confirmPassword'];
       requiredFields.forEach(fieldId => {
         const field = document.getElementById(fieldId);
         const feedback = field.closest('.form-group').querySelector('.invalid-feedback');
